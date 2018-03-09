@@ -1,0 +1,20 @@
+{
+    "name": "xbrain/ufw-base",
+    "description": "Micro-framework, intended to small API based web applications.",
+    "type": "library",
+    "license": "Apache",
+    "authors": [
+        {
+            "name": "xbrain",
+            "email": "contact@xbrain.com"
+        }
+    ],
+    "require": {
+        "altorouter/altorouter": "^1.2",
+        "smarty/smarty": "^3.1",
+        "clio/clio": "^0.1.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    }
+}
