@@ -16,5 +16,11 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0"
-    }
+    },
+    "autoload": {
+        "psr-4": {
+            "xbrain\\ufw\\": "src/ufw"
+        }
+    },    
+    "bin": ["bin/ufw"]
 }
