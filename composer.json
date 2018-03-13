@@ -2,7 +2,7 @@
     "name": "xbrain/ufw-base",
     "description": "Micro-framework, intended to small API based web applications.",
     "type": "library",
-    "license": "Apache",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "xbrain",
