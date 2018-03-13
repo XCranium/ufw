@@ -1,7 +1,5 @@
 <?php
-
 namespace xbrain\ufw;
-
 
 class Application {
     
@@ -13,13 +11,14 @@ class Application {
     const CMP_HTTP = 'http';
     const CMP_CONFIG = 'config';
     
+    const DEF_APPS_PATH = 'app_path';
     
     protected $lsComponents = [];
     protected $config = [];
     
     protected static $instance;
     
-    
+
     public static function getInstance($props=[]) {
         if (!self::$instance) {
             self::$instance = new Application($props);
@@ -36,8 +35,11 @@ class Application {
     
     
     protected function loadProps($props=[]) {
-        foreach ($props as $cmpID => $cmp) {
+        foreach ($props as $cmpID => $value) {
             switch ($cmpID) {
+                case selr::DEF_APPS_PATH:
+                    $this->appsPath = $value;
+                    break;
                 case self::CMP_DB:
                 case self::CMP_VIEW:
                 case self::CMP_DEBUG:
@@ -45,7 +47,7 @@ class Application {
                 case self::CMP_HTTP: 
                 case self::CMP_REQUEST: 
                 case self::CMP_CONFIG: 
-                    $this->lsComponents[$cmpID] = $cmp;
+                    $this->lsComponents[$cmpID] = $value;
                     break;
                 default:
                     // invalid component
@@ -108,30 +110,32 @@ class Application {
         return $this->getComponent(self::CMP_CONFIG);
     }
     
+    protected $appsPath = '../apps/';
+    
+    
+    public function getApplicationsPath() {
+        return $this->appsPath;
+    }
+    
     
     
     public function init() {
         
-        $this->loadConfig();
+        $this->loadConfig();        
         
-        $path = $this->getConfig()->getPath().'/../config/routes.json';
-       // echo $path;
-        $this->getRouter()->loadRoutes($path);
-        
-        // iterate...
-        $path = $this->getConfig()->getPath().'/../apps/'.$this->getRouter()->getApplicationName().'/routes/';
+        $path = $this->getConfig()->getPath().'/' . $this->getApplicationsPath()  .$this->getRouter()->getApplicationName().'/routes/';
         $this->getRouter()->loadRoutes($path,$this->getRouter()->getApplicationName());
-        
-//        echo '<pre>';
-//        print_r($this->getRouter()->getRoutes());
         
     }
     
     
     protected function loadConfig() {
-        // load json file
-        // iterate apps folder
-//        print_r($this->getConfig()); exit;
+        $path = $this->getConfig()->getPath().'/../config/routes.json';
+        $this->getRouter()->loadRoutes($path);
+        
+        
+        
+        
     }
     
     
