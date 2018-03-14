@@ -37,7 +37,7 @@ class Application {
     protected function loadProps($props=[]) {
         foreach ($props as $cmpID => $value) {
             switch ($cmpID) {
-                case selr::DEF_APPS_PATH:
+                case self::DEF_APPS_PATH:
                     $this->appsPath = $value;
                     break;
                 case self::CMP_DB:
