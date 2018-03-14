@@ -12,7 +12,8 @@ class Setup {
     ];
     
     const FILES_APP = [
-        
+        'bootstrap.php' => 'PD9waHANCiRpbmNsdWRlID0gX19ESVJfXyAuIi92ZW5kb3IvYXV0b2xvYWQucGhwIjsNCmluY2x1ZGUgJGluY2x1ZGU7',
+        'routes/main.json' => 'ew0KICAgICJyb3V0ZXMiOiB7DQogICAgICAgICIvIiA6IHsNCiAgICAgICAgICAgICJHRVQiIDogew0KICAgICAgICAgICAgICAgICJldmFsIiA6ICJwaHBpbmZvKCk7Ig0KICAgICAgICAgICAgfQ0KICAgICAgICB9DQogICAgfQ0KfQ=='
     ];
     
     
@@ -28,7 +29,7 @@ class Setup {
             $this->createProject(Console::getArg('--create'));
             return;
         } elseif (Console::getArg('--init')) {
-            $this->initProject();
+            $this->initWorkspace();
             return;
         }
         
@@ -38,7 +39,7 @@ class Setup {
     }
     
     
-    protected function initProject() {        
+    protected function initWorkspace() {        
         $this->createDirectory(['apps', 'bootstrap', 'config', 'public']);
         foreach (self::FILES_BASE as $pathname => $contents) {
             $this->createFile($pathname, $contents);
@@ -47,10 +48,14 @@ class Setup {
     
     
     protected function createProject($projectName='myProj') {        
-        Console::stdout("Creating $projectName \n");        
+        Console::stdout("Creating project $projectName... ");        
         
         $this->createDirectory("./apps/".$projectName, ['src', 'routes', 'bootstrap', 'config', 'public', 'doc','templates']);
         echo "\n";
+        foreach (self::FILES_APP as $pathname => $contents) {
+            $this->createFile("./apps/".$projectName."/$pathname", $contents);
+        }        
+        echo "\nDone!\n";
     }
     
     
@@ -61,7 +66,7 @@ class Setup {
                 $this->createDirectory($item);
             }
         } elseif (is_scalar($path)) {
-            echo "\n Creating $path ";
+            
             if (strpos($path, '/') !== false) {
                 $pathParts = explode("/", $path);
                 $path = '';
@@ -69,6 +74,7 @@ class Setup {
                     if (!empty($item)) {
                         $path .= $item;
                        if (!file_exists($path)) {
+                           echo "\n Creating $path ";
                             mkdir($path);
                        }
                        $path .= '/';
@@ -78,6 +84,7 @@ class Setup {
                 if (file_exists($path)) {
                     $success = true;
                 } else {
+                    echo "\n Creating $path ";
                     $success = mkdir($path);
                 }
             }
@@ -104,7 +111,10 @@ class Setup {
             $dirName = dirname($pathname);
             $this->createDirectory($dirName);            
         }
-        file_put_contents($pathname, base64_decode($contents));
+        if (!file_exists($pathname)) {
+            echo "\n Creating file $pathname ";
+            file_put_contents($pathname, base64_decode($contents));
+        }
         
     }
     
