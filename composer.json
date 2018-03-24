@@ -12,7 +12,8 @@
     "require": {
         "altorouter/altorouter": "^1.2",
         "smarty/smarty": "^3.1",
-        "clio/clio": "^0.1.8"
+        "clio/clio": "^0.1.8",
+        "delight-im/db": "^1.2"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0"
