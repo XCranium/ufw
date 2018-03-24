@@ -22,6 +22,11 @@ class Application {
     protected static $instance;
     
 
+    /**
+     * 
+     * @param array $props
+     * @return Application
+     */
     public static function getInstance($props=[]) {
         if (!self::$instance) {
             self::$instance = new Application($props);
