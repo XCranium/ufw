@@ -94,7 +94,13 @@ abstract class BO {
         
         $mapped = $this->map($this->getMapFields(), $arr);
         if ($this->getSequenceName()) {
-            $this->id = $this->getDAO()->insert($this->getTableName(), $mapped, $this->getSequenceName());
+            
+            if (array_key_exists('id', $mapped)) {
+                $this->id = $mapped['id'];
+                $this->getDAO()->insert($this->getTableName(), $mapped);
+            } else {            
+                $this->id = $this->getDAO()->insert($this->getTableName(), $mapped, $this->getSequenceName());
+            }
         } else {
             $this->getDAO()->insert($this->getTableName(), $mapped);
             $this->id = null;

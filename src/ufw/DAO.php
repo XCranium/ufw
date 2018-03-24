@@ -40,7 +40,9 @@ class DAO extends \PDO {
         
         $this->select($sql, $fieldValues, false);
         
-        return $this->lastInsertId($sequenceName);
+        if ($sequenceName) {        
+            return $this->lastInsertId($sequenceName);
+        };
     }
     
     
