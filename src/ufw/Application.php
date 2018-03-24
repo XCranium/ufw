@@ -15,6 +15,9 @@ class Application {
     
     protected $lsComponents = [];
     protected $config = [];
+
+    protected $appsPath = '../apps/';
+    
     
     protected static $instance;
     
@@ -36,23 +39,33 @@ class Application {
     
     protected function loadProps($props=[]) {
         foreach ($props as $cmpID => $value) {
-            switch ($cmpID) {
-                case self::DEF_APPS_PATH:
-                    $this->appsPath = $value;
-                    break;
-                case self::CMP_DB:
-                case self::CMP_VIEW:
-                case self::CMP_DEBUG:
-                case self::CMP_ROUTER:
-                case self::CMP_HTTP: 
-                case self::CMP_REQUEST: 
-                case self::CMP_CONFIG: 
-                    $this->lsComponents[$cmpID] = $value;
-                    break;
-                default:
-                    // invalid component
-            }
+            $this->addProp($cmpID, $value);
         }
+    }
+    
+    
+    public function addProp($cmpID, $value) {
+        switch ($cmpID) {
+            case self::DEF_APPS_PATH:
+                $this->appsPath = $value;
+                break;
+            case self::CMP_DB:
+                if (!array_key_exists($cmpID, $this->lsComponents)) {
+                    $this->lsComponents[$cmpID] = [];
+                }
+                $this->lsComponents[$cmpID][] = $value;
+                break;
+            case self::CMP_VIEW:
+            case self::CMP_DEBUG:
+            case self::CMP_ROUTER:
+            case self::CMP_HTTP: 
+            case self::CMP_REQUEST: 
+            case self::CMP_CONFIG: 
+                $this->lsComponents[$cmpID] = $value;
+                break;
+            default:
+                // invalid component
+        }        
     }
     
     
@@ -74,11 +87,29 @@ class Application {
     }
     
     
-    protected function getComponent($key) {
+    /**
+     * 
+     * @param type $key
+     * @param type $index
+     * @return type
+     * @throws \Exception
+     */
+    protected function getComponent($key, $index=false) {
         if (!Utils::get($key, $this->lsComponents)) {
             throw new \Exception("Component " . $key." is not defined",1);
         }
-        return Utils::get($key, $this->lsComponents);        
+        
+        $cmp = Utils::get($key, $this->lsComponents);
+        
+        if ($index!==false && is_array($cmp)) {
+            if (array_key_exists($index, $cmp)) {
+                $cmp = $cmp[$index];
+            } else {
+                throw new \Exception("Component $key ($index) is not defined", 2);
+            }
+        }
+        
+        return $cmp;        
     }
     
     
@@ -110,12 +141,22 @@ class Application {
         return $this->getComponent(self::CMP_CONFIG);
     }
     
-    protected $appsPath = '../apps/';
+    
+    /**
+     * 
+     * @return DAO
+     */
+    public function getDB($index=0) {
+        return $this->getComponent(self::CMP_DB, $index);
+    }
     
     
     public function getApplicationsPath() {
         return $this->appsPath;
     }
+    
+    
+    
     
     
     
