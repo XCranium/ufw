@@ -18,3 +18,6 @@
 
 ### v0.0.5 Refactoring DAO and adding class BO
 
+### v0.0.6 Adding CLI support to execute applications
+- added options --run and --data on ufw script.
+- help feature improved
