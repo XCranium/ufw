@@ -2,6 +2,7 @@
 
 namespace xbrain\ufw;
 
+
 class Setup {
     
     const FILES_BASE = [
@@ -30,6 +31,8 @@ class Setup {
         } elseif (Console::getArg('--init')) {
             $this->initProject();
             return;
+        } elseif (Console::getArg('--run')) {
+            $this->runAction(Console::getArg('--run'),json_decode(Console::getArg('--data','[]'),true)  );
         }
         
         
@@ -109,4 +112,67 @@ class Setup {
     }
     
     
+    
+    protected function runAction($url,$data=[]) {
+        
+        if (strpos($url, ":")) {
+            $parts = explode(":",$url);
+            $method = strtoupper($parts[0]);
+            $uri = $parts[1];
+        } else {
+            $method = 'GET';
+            $uri = $url;
+        }
+        
+        
+//        print_r($data);
+//        echo "\n $url \n " . __DIR__ . "\n\n";
+        $_REQUEST = $data;
+        $_SERVER['REQUEST_URI'] = $uri;
+        $_SERVER['REQUEST_METHOD'] = $method;
+                
+
+require __DIR__."/../../../../../vendor/autoload.php";
+// require __DIR__."/../../ufw/vendor/autoload.php";
+
+
+$request = \xbrain\ufw\Request::of();
+
+$appFolder = __DIR__.'/../../../../../apps/';
+//$appFolder = '../../../../../apps/';
+$appFolder ='../apps/';
+
+//echo "\n\n\n $appFolder \n\n ";
+
+$app = \xbrain\ufw\ApplicationCli::getInstance([
+    Application::DEF_APPS_PATH => $appFolder ,
+    Application::CMP_ROUTER => new \xbrain\ufw\Router(),
+    Application::CMP_REQUEST => $request,
+    Application::CMP_CONFIG => \xbrain\ufw\Config::of(__DIR__.'/../../../..')
+]);
+
+
+
+$app->init();
+
+
+///print_r($app->getRouter()->getRoutes());
+
+
+$app->run();
+
+        
+        
+        
+                
+//        require_once __DIR__ .'/../../../../../bootstrap/init.php'; 
+        
+        exit;
+    }
+    
+    
+    
+    
 }
+
+

@@ -17,7 +17,7 @@ class Request {
     public static function of() {
         $obj = new Request();
         
-        $headers = getallheaders();        
+        $headers = \getallheaders();        
         $obj->contentType = Utils::get('Content-Type', $headers, 'application/json');
         $obj->headers = $headers;
         $obj->parameters = $_REQUEST;

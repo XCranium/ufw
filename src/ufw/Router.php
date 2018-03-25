@@ -74,7 +74,7 @@ class Router extends \AltoRouter {
     public function evaluate2() {
         $return = false;
         $match = $this->match();
-        echo $_SERVER['REQUEST_URI'];
+//        echo $_SERVER['REQUEST_URI'];
         if (is_array($match) && array_key_exists('target', $match)) {
             
             $target = $match['target'];
@@ -187,7 +187,7 @@ class Router extends \AltoRouter {
         if (!is_array($params)) {
             $params = [];
         }
-        $request = array_merge($_REQUEST, ($params??[]));
+        $request = array_merge($_REQUEST??[], ($params??[]));
         
         $headers = getallheaders();
         if (is_array($headers) 
@@ -211,7 +211,11 @@ class Router extends \AltoRouter {
         $controller = $target['controller'];
         $method = $target['method'];
         
-        $pathToInclude = "../apps/".$this->getApplicationName()."/bootstrap.php";        
+        
+        
+        $pathToInclude = Application::getInstance()->getApplicationsPath2().$this->getApplicationName()."/bootstrap.php";        
+        
+//        echo "\n pathToInclude=$pathToInclude\n";
         include $pathToInclude;
         
         if (($controller != null) && (is_callable(array($controller, $method)))) {

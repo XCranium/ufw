@@ -161,12 +161,16 @@ class Application {
     }
     
     
+    public function getApplicationsPath2() {
+        return $this->appsPath;
+    }
     
     
     
     
-    public function init() {
-        
+    
+    
+    public function init() {        
         $this->loadConfig();        
         
         $path = $this->getConfig()->getPath().'/' . $this->getApplicationsPath()  .$this->getRouter()->getApplicationName().'/routes/';
