@@ -211,12 +211,14 @@ class Router extends \AltoRouter {
         $controller = $target['controller'];
         $method = $target['method'];
         
-        
-        
         $pathToInclude = Application::getInstance()->getApplicationsPath2().$this->getApplicationName()."/bootstrap.php";        
         
-//        echo "\n pathToInclude=$pathToInclude\n";
-        include $pathToInclude;
+        if (file_exists($pathToInclude)) {
+            include $pathToInclude;
+        } else {
+            throw new \Exception("Bootstrap file not found", 405);
+        }
+        
         
         if (($controller != null) && (is_callable(array($controller, $method)))) {
             $params = $this->processRequest($match['params']);
