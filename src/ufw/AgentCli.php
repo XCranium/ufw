@@ -74,4 +74,43 @@ class AgentCli {
         $this->help();
     }
     
+    
+    
+    protected $run;
+    protected $config;
+    protected function runAgent() {
+        
+        $this->run = true;
+        
+        
+        while($this->run) {
+            
+            $task = $this->getNextTask();
+            
+            if ($task) {
+                $this->runTask($task);
+            }
+            
+            $this->sleep();
+            
+        }
+        
+        
+        
+    }
+    
+    
+    public function sleep() {
+        
+    }
+    
+    public function getNextTask() {
+        
+    }
+    
+    public function runTask() {
+        
+    }
+    
+    
 }
