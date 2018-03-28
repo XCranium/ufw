@@ -21,3 +21,5 @@
 ### v0.0.6 Adding CLI support to execute applications
 - added options --run and --data on ufw script.
 - help feature improved
+
+### v0.0.7 First version with agent
