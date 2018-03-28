@@ -28,5 +28,6 @@ if (!function_exists('\getallheaders'))
         }
     }
 
+    
 
-return new xbrain\ufw\Setup();
+return new $className();

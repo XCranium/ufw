@@ -22,5 +22,5 @@
             "xbrain\\ufw\\": "src/ufw"
         }
     },    
-    "bin": ["bin/ufw"]
+    "bin": ["bin/ufw", "bin/ufw-agent"]
 }

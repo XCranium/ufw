@@ -1,5 +1,5 @@
 #!/usr/bin/env php
 <?php
-$className = "xbrain\\ufw\\Setup";
+$className = "xbrain\\ufw\\AgentCli";
 $app = require __DIR__ . '/../app/ufw.php';
 $app->run();
