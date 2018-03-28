@@ -40,8 +40,26 @@ class AgentCli {
         ]
     ];
     
+    
+    const DEFAULT_CONFIG = [
+            'delay' => 5,
+            'host' => 'http://localhost:8008',
+            'config_ttl' => 90,       
+            'lock_dir' => './',
+            'db_tasks' => [
+                'source_type' => 'config',
+                'tasks_ttl' => 60
+            ]
+        ];
+    
+    
+    protected $run;
+    protected $config;
+    protected $tasks = [];
+    
+    
     public function help() {
-        echo "ufw - Helper to uFw framework\nOptions:\n";
+        echo "ufw - Async agent to uFw framework\nOptions:\n";
         foreach (self::HELP['options'] as $helpOption => $helpDescription) {
             echo "\n   $helpOption \t " . ($helpDescription['summary']??"");
             if (array_key_exists('examples', $helpDescription)) {
@@ -57,6 +75,28 @@ class AgentCli {
     
     
     public function run() {
+        
+        if (Console::getArg('--config')) {
+            $this->applyConfig('cli',Console::getArg('--config'));
+            //return;
+        } elseif (Console::getArg('--config-file')) {
+            $this->applyConfig('file',Console::getArg('--config-file'));
+        }
+        
+        if (Console::getArg('--tasks')) {
+            $this->applyTasks('cli',Console::getArg('--tasks'));
+            //return;
+        } elseif (Console::getArg('--tasks-file')) {
+            $this->applyTasks('file',Console::getArg('--tasks-file'));
+        }
+        
+        
+        
+        
+        if (Console::getArg('--run')) {
+            $this->runAgent();
+            return;
+        }
         
         
 //        if (Console::getArg('--create')) {
@@ -74,14 +114,24 @@ class AgentCli {
         $this->help();
     }
     
+    public function __construct() {
+        $this->applyConfig('cli', '[]');
+    }
     
     
-    protected $run;
-    protected $config;
     protected function runAgent() {
         
         $this->run = true;
         
+        $this->readConfig();
+        
+        
+        if (empty($this->tasks)) {
+            echo "\n\n##################################\n## Error: no tasks assigned \n##################################\n\n";
+            exit;
+        }
+        
+        $this->writeLockFile();
         
         while($this->run) {
             
@@ -90,8 +140,12 @@ class AgentCli {
             if ($task) {
                 $this->runTask($task);
             }
-            
+            echo "\n " . date('His');
             $this->sleep();
+            echo "\n " . date('His');
+            $this->readConfig();
+            
+            //print_r(['config'=>$this->config,'tasks'=>$this->tasks]);
             
         }
         
@@ -100,17 +154,119 @@ class AgentCli {
     }
     
     
-    public function sleep() {
+    protected function writeLockFile() {
         
+        $lockDir = Utils::get('lock_dir', $this->config,'./');
+        
+        
+        if (!is_writable($lockDir)) {
+            throw new \Exception("Folder not writable ($lockDir)",7);
+        }
+        
+        $lockFile = $lockDir."/ufw.lock";
+        
+        if (file_exists($lockFile)) {
+            $lock = json_decode(file_get_contents($lockFile),true);
+        }
+        
+        $lock[getmypid()] = [
+            'started' => time(),
+            'pid' => getmypid(),
+            'config' => $this->config
+        ];
+        
+        file_put_contents($lockFile, json_encode($lock));
+    }
+    
+    
+    protected function applyConfig($type, $data) {
+        if ($type == 'cli') {
+            
+            $json = json_decode($data,true);
+            $this->config = array_replace_recursive(self::DEFAULT_CONFIG, $json);
+            
+        } elseif ($type == 'file') {
+            if (file_exists($data)) {
+                $text = file_get_contents($data);
+                $json = json_decode($text,true);
+                $this->config = array_replace_recursive(self::DEFAULT_CONFIG, $json);
+            }
+        }
+    }
+    
+    
+    protected $executionPlan = [];
+    protected $nextExecution = 0;
+    
+    protected function applyTasks($type, $data) {
+        if ($type == 'cli') {
+            
+            $json = json_decode($data,true);
+            $this->tasks = $json;
+            
+        } elseif ($type == 'file') {
+            if (file_exists($data)) {
+                $text = file_get_contents($data);
+                $json = json_decode($text,true);
+                $this->tasks = array_replace_recursive($this->tasks, $json);
+            }
+        }
+        
+        foreach ($this->tasks as $k => $task) {
+            $this->executionPlan[] = $k;
+        }
+        $this->nextExecution = 0;
+        
+    }
+    
+    
+    public function sleep() {
+        $n = Utils::get('delay', $this->config, 10);
+        sleep($n);
     }
     
     public function getNextTask() {
+        $i =  $this->executionPlan[$this->nextExecution++];        
+        $this->nextExecution = $this->nextExecution % count($this->executionPlan);
+        return $this->tasks[$i];
+    }
+    
+    public function runTask($task) {
+        
+        
+        $baseURI = Utils::get('base_uri', $task, Utils::get('host', $this->config, 'http://localhost/'));
+        
+        
+        $client = new \GuzzleHttp\Client([
+            // Base URI is used with relative requests
+            'base_uri' => $baseURI
+        ]);
+        
+        
+        
+        $httpMethod = Utils::get('method', $task, 'GET');
+        $uri = Utils::get('uri', $task, '/');
+        $options = Utils::get('options', $task, []);
+        
+        
+        $response = $client->request($httpMethod, $uri, $options);
+        
+        $body = $response->getBody();
+        
+        if (Utils::get('output', $task)) {
+            file_put_contents(Utils::get('output', $task), $body);
+        }
         
     }
     
-    public function runTask() {
+    
+    public function readConfig() {
+        
+
+        
+        //$this->config = [];
+        
         
     }
-    
     
 }

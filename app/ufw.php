@@ -1,7 +1,10 @@
 <?php
 
+error_reporting(E_ALL & !E_NOTICE);
+error_reporting(E_ALL);
 
 $autoloader = require __DIR__ . '/../src/composer_autoloader.php';
+
 
 if (!$autoloader()) {
     die(
@@ -10,6 +13,9 @@ if (!$autoloader()) {
       'php composer.phar install' . PHP_EOL
     );
 }
+
+
+//require getcwd()."/vendor/xbrain/ufw-base/vendor/autoload.php";
 
 if (!function_exists('\getallheaders'))
     {
