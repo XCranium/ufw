@@ -96,6 +96,9 @@ class AgentCli {
         if (Console::getArg('--run')) {
             $this->runAgent();
             return;
+        } elseif (Console::getArg('--status')) {
+            $this->checkStatus();
+            return;
         }
         
         
@@ -113,6 +116,36 @@ class AgentCli {
         
         $this->help();
     }
+    
+    
+    public function checkStatus() {
+        
+        try {
+            $status = $this->readLockFile();
+            $ph = new utils\ProcessHandler(true);
+            
+            echo "\n";
+            foreach ($status as $pid => $data) {
+                
+                if ($ph->getProcess($pid)) {
+                    $stat = ' running ';
+                } else {
+                    $stat = ' missing ';
+                }
+                
+                echo "\n pid:            $pid       ($stat)";
+                echo "\n started:       " . date('Y-m-d H:i:s',$data['started']);
+                echo "\n configuration: " . json_encode($data['config'])."\n---\n";
+            }
+            
+            
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+        
+    }
+    
+    
     
     public function __construct() {
         $this->applyConfig('cli', '[]');
@@ -154,16 +187,24 @@ class AgentCli {
     }
     
     
+    protected function getLockDir() {
+        $lockDir = Utils::get('lock_dir', $this->config,'./');
+        return $lockDir;
+    }
+    
+    protected function getLockFile() {
+        $lockFile = $this->getLockDir()."/ufw.lock";
+        return $lockFile;
+    }
+    
     protected function writeLockFile() {
         
-        $lockDir = Utils::get('lock_dir', $this->config,'./');
-        
-        
+        $lockDir = $this->getLockDir();
         if (!is_writable($lockDir)) {
             throw new \Exception("Folder not writable ($lockDir)",7);
         }
         
-        $lockFile = $lockDir."/ufw.lock";
+        $lockFile = $this->getLockFile();
         
         if (file_exists($lockFile)) {
             $lock = json_decode(file_get_contents($lockFile),true);
@@ -176,6 +217,25 @@ class AgentCli {
         ];
         
         file_put_contents($lockFile, json_encode($lock));
+    }
+    
+    
+    protected function readLockFile() {
+        
+        $lockDir = $this->getLockDir();
+        if (!is_writable($lockDir)) {
+            throw new \Exception("Folder not writable ($lockDir)",7);
+        }
+        
+        $lockFile = $this->getLockFile();
+        
+        if (file_exists($lockFile)) {
+            $lock = json_decode(file_get_contents($lockFile),true);
+        } else {
+            throw new \Exception("Lock file does not exists",8);
+        }
+        return $lock;
+        
     }
     
     
@@ -268,5 +328,15 @@ class AgentCli {
         
         
     }
+    
+    
+    
+    
+    public function checkAndRestart() {
+        
+    }
+    
+    
+    
     
 }
