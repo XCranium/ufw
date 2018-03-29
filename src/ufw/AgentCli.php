@@ -133,6 +133,11 @@ class AgentCli {
                     $stat = ' missing ';
                 }
                 
+                if (Console::getArg('--force-restart')) {
+                    $stat = $this->restartAgent($data);
+                }
+                
+                
                 echo "\n pid:            $pid       ($stat)";
                 echo "\n started:       " . date('Y-m-d H:i:s',$data['started']);
                 echo "\n configuration: " . json_encode($data['config'])."\n---\n";
@@ -145,6 +150,14 @@ class AgentCli {
         
     }
     
+    
+    protected function restartAgent($data) {
+        
+        // TODO: create the command line with $data
+        
+        $command = "";
+        $bp = new utils\BackgroundProcess($command);
+    }
     
     
     public function __construct() {
